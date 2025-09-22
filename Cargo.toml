@@ -1,0 +1,29 @@
+[package]
+name = "tt-smi-rs"
+version = "0.1.0"
+edition = "2024"
+authors = ["Ludwig"]
+description = "TUI for monitoring Tenstorrent hardware - Rust implementation"
+license = "Apache-2.0"
+
+[dependencies]
+ratatui = "0.26"
+crossterm = "0.27"
+tokio = { version = "1.36", features = ["full"] }
+clap = { version = "4.5", features = ["derive"] }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+anyhow = "1.0"
+thiserror = "1.0"
+chrono = { version = "0.4", features = ["serde"] }
+log = "0.4"
+env_logger = "0.11"
+sysinfo = "0.30"
+luwen-if = { path = "luwen/crates/luwen-if" }
+luwen-ref = { path = "luwen/crates/luwen-ref" }
+luwen-core = { path = "luwen/crates/luwen-core" }
+ttkmd-if = { path = "luwen/crates/ttkmd-if" }
+
+[[bin]]
+name = "tt-smi-rs"
+path = "src/main.rs"
