@@ -1,0 +1,3 @@
+[submodule "luwen"]
+	path = luwen
+	url = https://github.com/tenstorrent/luwen.git

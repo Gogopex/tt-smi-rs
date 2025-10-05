@@ -714,14 +714,14 @@ dependencies = [
 
 [[package]]
 name = "luwen-core"
-version = "0.2.0"
+version = "0.2.1"
 dependencies = [
  "thiserror 1.0.69",
 ]
 
 [[package]]
 name = "luwen-if"
-version = "0.6.5"
+version = "0.7.11"
 dependencies = [
  "bincode",
  "bitfield-struct",
@@ -734,7 +734,6 @@ dependencies = [
  "prost",
  "prost-build",
  "prost-types",
- "protoc-bin-vendored",
  "rust-embed",
  "serde",
  "serde_json",
@@ -743,7 +742,7 @@ dependencies = [
 
 [[package]]
 name = "luwen-ref"
-version = "0.5.3"
+version = "0.7.11"
 dependencies = [
  "indicatif",
  "luwen-core",
@@ -1026,55 +1025,6 @@ checksum = "52c2c1bf36ddb1a1c396b3601a3cec27c2462e45f07c386894ec3ccf5332bd16"
 dependencies = [
  "prost",
 ]
-
-[[package]]
-name = "protoc-bin-vendored"
-version = "3.1.0"
-source = "git+https://github.com/TTDRosen/rust-protoc-bin-vendored?rev=3cf2dd3df18b0a864f896d2fedf7acbacf3ac2c6#3cf2dd3df18b0a864f896d2fedf7acbacf3ac2c6"
-dependencies = [
- "protoc-bin-vendored-linux-aarch_64",
- "protoc-bin-vendored-linux-ppcle_64",
- "protoc-bin-vendored-linux-x86_32",
- "protoc-bin-vendored-linux-x86_64",
- "protoc-bin-vendored-macos-aarch_64",
- "protoc-bin-vendored-macos-x86_64",
- "protoc-bin-vendored-win32",
-]
-
-[[package]]
-name = "protoc-bin-vendored-linux-aarch_64"
-version = "3.1.0"
-source = "git+https://github.com/TTDRosen/rust-protoc-bin-vendored?rev=3cf2dd3df18b0a864f896d2fedf7acbacf3ac2c6#3cf2dd3df18b0a864f896d2fedf7acbacf3ac2c6"
-
-[[package]]
-name = "protoc-bin-vendored-linux-ppcle_64"
-version = "3.1.0"
-source = "git+https://github.com/TTDRosen/rust-protoc-bin-vendored?rev=3cf2dd3df18b0a864f896d2fedf7acbacf3ac2c6#3cf2dd3df18b0a864f896d2fedf7acbacf3ac2c6"
-
-[[package]]
-name = "protoc-bin-vendored-linux-x86_32"
-version = "3.1.0"
-source = "git+https://github.com/TTDRosen/rust-protoc-bin-vendored?rev=3cf2dd3df18b0a864f896d2fedf7acbacf3ac2c6#3cf2dd3df18b0a864f896d2fedf7acbacf3ac2c6"
-
-[[package]]
-name = "protoc-bin-vendored-linux-x86_64"
-version = "3.1.0"
-source = "git+https://github.com/TTDRosen/rust-protoc-bin-vendored?rev=3cf2dd3df18b0a864f896d2fedf7acbacf3ac2c6#3cf2dd3df18b0a864f896d2fedf7acbacf3ac2c6"
-
-[[package]]
-name = "protoc-bin-vendored-macos-aarch_64"
-version = "3.1.0"
-source = "git+https://github.com/TTDRosen/rust-protoc-bin-vendored?rev=3cf2dd3df18b0a864f896d2fedf7acbacf3ac2c6#3cf2dd3df18b0a864f896d2fedf7acbacf3ac2c6"
-
-[[package]]
-name = "protoc-bin-vendored-macos-x86_64"
-version = "3.1.0"
-source = "git+https://github.com/TTDRosen/rust-protoc-bin-vendored?rev=3cf2dd3df18b0a864f896d2fedf7acbacf3ac2c6#3cf2dd3df18b0a864f896d2fedf7acbacf3ac2c6"
-
-[[package]]
-name = "protoc-bin-vendored-win32"
-version = "3.1.0"
-source = "git+https://github.com/TTDRosen/rust-protoc-bin-vendored?rev=3cf2dd3df18b0a864f896d2fedf7acbacf3ac2c6#3cf2dd3df18b0a864f896d2fedf7acbacf3ac2c6"
 
 [[package]]
 name = "quote"
@@ -1572,7 +1522,7 @@ dependencies = [
 
 [[package]]
 name = "ttkmd-if"
-version = "0.2.2"
+version = "0.2.3"
 dependencies = [
  "bitfield-struct",
  "luwen-core",
