@@ -222,10 +222,10 @@ impl TTHardware {
             wh_chip
                 .get_local_chip_coord()
                 .map(|eth_addr| Coordinates {
-                    x: eth_addr.rack_x,
-                    y: eth_addr.rack_y,
-                    rack: Some(eth_addr.shelf_x),
-                    shelf: Some(eth_addr.shelf_y),
+                    x: eth_addr.shelf_x,
+                    y: eth_addr.shelf_y,
+                    rack: Some(eth_addr.rack_x),
+                    shelf: Some(eth_addr.rack_y),
                 })
                 .unwrap_or_else(|_| Self::default_coordinates(index))
         } else {
