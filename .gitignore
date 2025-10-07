@@ -4,6 +4,7 @@
 !Cargo.lock
 !Cargo.toml
 !README.md
+!comparison_report.md
 !LICENSE
 !build.rs
 !src/
