@@ -10,3 +10,5 @@
 !src/**
 !assets/
 !assets/**
+!luwen/
+!.gitmodules

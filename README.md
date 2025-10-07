@@ -43,7 +43,18 @@ Options:
 
 ## Installation
 
+### Prerequisites
+- Rust 1.90+ 
+- protobuf compiler (`protoc`), required by `luwen-if`
+  - Arch: `sudo pacman -S protobuf`
+  - Ubuntu/Debian: `sudo apt-get install protobuf-compiler`
+
+### Building
+
 ```bash
+git clone --recursive https://github.com/gogopex/tt-smi-rs.git
+cd tt-smi-rs
+git submodule update --init --recursive
 cargo build --release
 ```
 
