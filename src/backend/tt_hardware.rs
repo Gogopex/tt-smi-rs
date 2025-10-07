@@ -11,7 +11,7 @@ trait ChipArchOps {
     const HEARTBEAT_MODULO: u32;
 
     fn calculate_temperature(telem: &luwen_if::chip::Telemetry) -> f32;
-    fn extract_dram_speed(telem: &luwen_if::chip::Telemetry) -> u32;
+    fn extract_dram_speed(telem: &luwen_if::chip::Telemetry) -> String;
     fn check_dram_trained(ddr_status: u32) -> bool;
 }
 
@@ -20,20 +20,19 @@ struct GrayskullOps;
 impl ChipArchOps for GrayskullOps {
     const DRAM_CHANNELS: usize = 6;
     const DRAM_TRAINED_STATUS: u32 = 1;
-    const HEARTBEAT_MODULO: u32 = 100;
+    const HEARTBEAT_MODULO: u32 = 1000;
 
     fn calculate_temperature(telem: &luwen_if::chip::Telemetry) -> f32 {
         ((telem.asic_temperature & 0xFFFF) as f32) / 16.0
     }
 
-    fn extract_dram_speed(telem: &luwen_if::chip::Telemetry) -> u32 {
-        telem.ddr_speed.unwrap_or(0)
+    fn extract_dram_speed(telem: &luwen_if::chip::Telemetry) -> String {
+        format!("{}G", telem.ddr_speed.unwrap_or(0))
     }
 
     fn check_dram_trained(ddr_status: u32) -> bool {
-        (0..Self::DRAM_CHANNELS)
-            .map(|i| (ddr_status >> (4 * i)) & 0xF)
-            .all(|status| status == Self::DRAM_TRAINED_STATUS)
+        let first_channel_status = ddr_status & 0xF;
+        first_channel_status == Self::DRAM_TRAINED_STATUS
     }
 }
 
@@ -42,21 +41,20 @@ struct WormholeOps;
 impl ChipArchOps for WormholeOps {
     const DRAM_CHANNELS: usize = 8;
     const DRAM_TRAINED_STATUS: u32 = 2;
-    const HEARTBEAT_MODULO: u32 = 256;
+    const HEARTBEAT_MODULO: u32 = 5;
 
     fn calculate_temperature(telem: &luwen_if::chip::Telemetry) -> f32 {
         ((telem.asic_temperature & 0xFFFF) as f32) / 16.0
     }
 
-    fn extract_dram_speed(telem: &luwen_if::chip::Telemetry) -> u32 {
+    fn extract_dram_speed(telem: &luwen_if::chip::Telemetry) -> String {
         let speed_bits = (telem.ddr_status >> 24) & 0xFF;
-        speed_bits_to_mhz(speed_bits)
+        speed_bits_to_ghz_string(speed_bits)
     }
 
     fn check_dram_trained(ddr_status: u32) -> bool {
-        (0..Self::DRAM_CHANNELS)
-            .map(|i| (ddr_status >> (4 * i)) & 0xF)
-            .all(|status| status == Self::DRAM_TRAINED_STATUS)
+        let first_channel_status = ddr_status & 0xF;
+        first_channel_status == Self::DRAM_TRAINED_STATUS
     }
 }
 
@@ -65,7 +63,7 @@ struct BlackholeOps;
 impl ChipArchOps for BlackholeOps {
     const DRAM_CHANNELS: usize = 8;
     const DRAM_TRAINED_STATUS: u32 = 2;
-    const HEARTBEAT_MODULO: u32 = 65536;
+    const HEARTBEAT_MODULO: u32 = 6;
 
     fn calculate_temperature(telem: &luwen_if::chip::Telemetry) -> f32 {
         let temp_raw = telem.asic_temperature as i32;
@@ -74,15 +72,14 @@ impl ChipArchOps for BlackholeOps {
         integer_part + fractional_part
     }
 
-    fn extract_dram_speed(telem: &luwen_if::chip::Telemetry) -> u32 {
+    fn extract_dram_speed(telem: &luwen_if::chip::Telemetry) -> String {
         let speed_bits = (telem.ddr_status >> 24) & 0xFF;
-        speed_bits_to_mhz(speed_bits)
+        speed_bits_to_ghz_string(speed_bits)
     }
 
     fn check_dram_trained(ddr_status: u32) -> bool {
-        (0..Self::DRAM_CHANNELS)
-            .map(|i| (ddr_status >> (4 * i)) & 0xF)
-            .all(|status| status == Self::DRAM_TRAINED_STATUS)
+        let first_channel_status = ddr_status & 0xF;
+        first_channel_status == Self::DRAM_TRAINED_STATUS
     }
 }
 
@@ -93,14 +90,14 @@ pub struct TTHardware {
 const VOLTAGE_SCALE: f32 = 1000.0;
 const LOWER_16_BIT_MASK: u32 = 0xFFFF;
 
-fn speed_bits_to_mhz(speed_bits: u32) -> u32 {
+fn speed_bits_to_ghz_string(speed_bits: u32) -> String {
     match speed_bits {
-        0 => 16000,
-        1 => 14000,
-        2 => 12000,
-        3 => 10000,
-        4 => 8000,
-        _ => 0,
+        0 => "16G".to_string(),
+        1 => "14G".to_string(),
+        2 => "12G".to_string(),
+        3 => "10G".to_string(),
+        4 => "8G".to_string(),
+        _ => "N/A".to_string(),
     }
 }
 
@@ -133,21 +130,19 @@ impl TTHardware {
         arch: luwen_core::Arch,
         telem: &luwen_if::chip::Telemetry,
     ) -> (f32, u32) {
-        let (temperature, heartbeat_modulo) = match arch {
-            luwen_core::Arch::Grayskull => (
-                GrayskullOps::calculate_temperature(telem),
-                GrayskullOps::HEARTBEAT_MODULO,
-            ),
-            luwen_core::Arch::Wormhole => (
-                WormholeOps::calculate_temperature(telem),
-                WormholeOps::HEARTBEAT_MODULO,
-            ),
-            luwen_core::Arch::Blackhole => (
-                BlackholeOps::calculate_temperature(telem),
-                BlackholeOps::HEARTBEAT_MODULO,
-            ),
+        let temperature = match arch {
+            luwen_core::Arch::Grayskull => GrayskullOps::calculate_temperature(telem),
+            luwen_core::Arch::Wormhole => WormholeOps::calculate_temperature(telem),
+            luwen_core::Arch::Blackhole => BlackholeOps::calculate_temperature(telem),
         };
-        (temperature, telem.arc0_health % heartbeat_modulo)
+
+        let heartbeat = match arch {
+            luwen_core::Arch::Grayskull => telem.arc0_health / GrayskullOps::HEARTBEAT_MODULO,
+            luwen_core::Arch::Wormhole => telem.arc3_health / WormholeOps::HEARTBEAT_MODULO,
+            luwen_core::Arch::Blackhole => telem.timer_heartbeat / BlackholeOps::HEARTBEAT_MODULO,
+        };
+
+        (temperature, heartbeat)
     }
 
     fn chip_to_device_info(&self, chip: &Chip, index: usize) -> Result<DeviceInfo> {
@@ -190,25 +185,35 @@ impl TTHardware {
                 )
             });
 
-        let board_type = match arch {
-            luwen_core::Arch::Grayskull => BoardType::Grayskull,
-            luwen_core::Arch::Wormhole => chip
-                .as_wh()
-                .map(|wh| {
-                    if wh.is_remote {
-                        BoardType::GalaxyN300Remote
-                    } else {
-                        BoardType::GalaxyN300Local
-                    }
-                })
-                .unwrap_or(BoardType::Wormhole),
-            luwen_core::Arch::Blackhole => BoardType::Blackhole,
-        };
-
         let telem = Self::get_chip_telemetry(chip).ok();
 
+        let board_type = if let Some(t) = &telem {
+            let board_id = format!("{:x}", t.board_serial_number());
+            let mut board_type = get_board_type_from_id(&board_id).unwrap_or_else(|| match arch {
+                luwen_core::Arch::Grayskull => BoardType::Grayskull,
+                luwen_core::Arch::Wormhole => BoardType::Wormhole,
+                luwen_core::Arch::Blackhole => BoardType::Blackhole,
+            });
+
+            // Override with remote/local detection for n300 specifically
+            if matches!(board_type, BoardType::GalaxyN300Local) {
+                if let Some(wh) = chip.as_wh() {
+                    if wh.is_remote {
+                        board_type = BoardType::GalaxyN300Remote;
+                    }
+                }
+            }
+            board_type
+        } else {
+            match arch {
+                luwen_core::Arch::Grayskull => BoardType::Grayskull,
+                luwen_core::Arch::Wormhole => BoardType::Wormhole,
+                luwen_core::Arch::Blackhole => BoardType::Blackhole,
+            }
+        };
+
         let board_id = if let Some(t) = &telem {
-            format!("{:016X}", t.board_serial_number())
+            format!("{:x}", t.board_serial_number())
         } else {
             format!("DEV{index:06X}")
         };
@@ -217,10 +222,10 @@ impl TTHardware {
             wh_chip
                 .get_local_chip_coord()
                 .map(|eth_addr| Coordinates {
-                    x: eth_addr.shelf_x,
-                    y: eth_addr.shelf_y,
-                    rack: Some(eth_addr.rack_x),
-                    shelf: Some(eth_addr.rack_y),
+                    x: eth_addr.rack_x,
+                    y: eth_addr.rack_y,
+                    rack: Some(eth_addr.shelf_x),
+                    shelf: Some(eth_addr.shelf_y),
                 })
                 .unwrap_or_else(|_| Self::default_coordinates(index))
         } else {
@@ -248,7 +253,7 @@ impl TTHardware {
             (Some(t), luwen_core::Arch::Grayskull) => GrayskullOps::extract_dram_speed(t),
             (Some(t), luwen_core::Arch::Wormhole) => WormholeOps::extract_dram_speed(t),
             (Some(t), luwen_core::Arch::Blackhole) => BlackholeOps::extract_dram_speed(t),
-            (None, _) => 0,
+            (None, _) => "N/A".to_string(),
         };
 
         Ok(DeviceInfo {
@@ -330,7 +335,7 @@ impl HardwareInterface for TTHardware {
         Ok(FirmwareInfo {
             fw_bundle_version: format_m3_fw_version(telem.fw_bundle_version),
             tt_flash_version: format_m3_fw_version(telem.tt_flash_version),
-            cm_fw_version: telem.arc_fw_version(),
+            cm_fw_version: format_m3_fw_version(telem.arc0_fw_version),
             cm_fw_date: telem.firmware_date(),
             eth_fw_version: telem.eth_fw_version(),
             bm_bl_version: format_m3_fw_version(telem.m3_bl_fw_version),
@@ -426,10 +431,11 @@ fn format_m3_fw_version(version: u32) -> String {
     if version == 0xFFFFFFFF || version == 0 {
         "N/A".to_string()
     } else {
-        let major = (version >> 16) & 0xFF;
-        let minor = (version >> 8) & 0xFF;
-        let patch = version & 0xFF;
-        format!("{major}.{minor}.{patch}")
+        let major = (version >> 24) & 0xFF;
+        let minor = (version >> 16) & 0xFF;
+        let patch = (version >> 8) & 0xFF;
+        let build = version & 0xFF;
+        format!("{major}.{minor}.{patch}.{build}")
     }
 }
 
@@ -468,4 +474,38 @@ fn get_pcie_info_from_device(
         max_speed,
         PcieWidth::Width(max_width),
     ))
+}
+
+fn get_board_type_from_id(board_id: &str) -> Option<BoardType> {
+    if let Ok(serial_num) = u64::from_str_radix(board_id, 16) {
+        let upi = (serial_num >> 36) & 0xFFFFF;
+
+        match upi {
+            // Grayskull cards
+            0x3 => Some(BoardType::GalaxyE150),
+            0xA => Some(BoardType::GalaxyE150), // e300 maps to GalaxyE150 for now
+            0x7 => Some(BoardType::GalaxyE75),
+
+            // Wormhole cards
+            0x8 => Some(BoardType::Wormhole), // nb_cb
+            0xB => Some(BoardType::Wormhole), // wh_4u
+            0x14 => Some(BoardType::GalaxyN300Local), // n300
+            0x18 => Some(BoardType::GalaxyN150), // n150
+            0x35 => Some(BoardType::Wormhole), // tt-galaxy-wh
+
+            // Blackhole cards
+            0x36 => Some(BoardType::Blackhole), // bh-scrappy
+            0x43 => Some(BoardType::Blackhole), // p100a
+            0x40 => Some(BoardType::Blackhole), // p150a
+            0x41 => Some(BoardType::Blackhole), // p150b
+            0x42 => Some(BoardType::Blackhole), // p150c
+            0x44 => Some(BoardType::Blackhole), // p300b
+            0x45 => Some(BoardType::Blackhole), // p300a
+            0x46 => Some(BoardType::Blackhole), // p300c
+            0x47 => Some(BoardType::Blackhole), // tt-galaxy-bh
+            _ => None,
+        }
+    } else {
+        None
+    }
 }
