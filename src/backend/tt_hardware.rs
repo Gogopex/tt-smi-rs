@@ -487,11 +487,11 @@ fn get_board_type_from_id(board_id: &str) -> Option<BoardType> {
             0x7 => Some(BoardType::GalaxyE75),
 
             // Wormhole cards
-            0x8 => Some(BoardType::Wormhole), // nb_cb
-            0xB => Some(BoardType::Wormhole), // wh_4u
+            0x8 => Some(BoardType::Wormhole),         // nb_cb
+            0xB => Some(BoardType::Wormhole),         // wh_4u
             0x14 => Some(BoardType::GalaxyN300Local), // n300
-            0x18 => Some(BoardType::GalaxyN150), // n150
-            0x35 => Some(BoardType::Wormhole), // tt-galaxy-wh
+            0x18 => Some(BoardType::GalaxyN150),      // n150
+            0x35 => Some(BoardType::Wormhole),        // tt-galaxy-wh
 
             // Blackhole cards
             0x36 => Some(BoardType::Blackhole), // bh-scrappy
