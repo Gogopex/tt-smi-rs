@@ -7,7 +7,7 @@ use tokio::time::interval;
 
 use crate::backend::Backend;
 use crate::telemetry::TelemetryData;
-use crate::ui::{Tab, draw_ui};
+use crate::ui::{draw_ui, Tab};
 
 pub struct App {
     should_quit: bool,

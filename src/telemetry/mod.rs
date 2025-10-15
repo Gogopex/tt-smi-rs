@@ -21,7 +21,7 @@ pub struct DeviceInfo {
     pub board_id: String,
     pub coords: Coordinates,
     pub dram_status: DramStatus,
-    pub dram_speed: u32,
+    pub dram_speed: String,
     pub pcie_link_speed: PcieSpeed,
     pub pcie_link_width: PcieWidth,
     pub pcie_max_speed: PcieSpeed,
@@ -141,9 +141,9 @@ pub struct Coordinates {
 impl fmt::Display for Coordinates {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         if let (Some(rack), Some(shelf)) = (self.rack, self.shelf) {
-            write!(f, "({},{},{},{})", rack, shelf, self.x, self.y)
+            write!(f, "({}, {}, {}, {})", self.x, self.y, rack, shelf)
         } else {
-            write!(f, "({},{})", self.x, self.y)
+            write!(f, "({}, {})", self.x, self.y)
         }
     }
 }
@@ -158,8 +158,8 @@ pub enum DramStatus {
 impl fmt::Display for DramStatus {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let s = match self {
-            DramStatus::Trained => "Trained",
-            DramStatus::NotTrained => "Not Trained",
+            DramStatus::Trained => "Y",
+            DramStatus::NotTrained => "N",
             DramStatus::Unknown => "Unknown",
         };
         write!(f, "{s}")
@@ -188,11 +188,11 @@ pub enum PcieWidth {
 impl fmt::Display for PcieSpeed {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let s = match self {
-            PcieSpeed::Gen1 => "2.5 GT/s",
-            PcieSpeed::Gen2 => "5.0 GT/s",
-            PcieSpeed::Gen3 => "8.0 GT/s",
-            PcieSpeed::Gen4 => "16.0 GT/s",
-            PcieSpeed::Gen5 => "32.0 GT/s",
+            PcieSpeed::Gen1 => "1",
+            PcieSpeed::Gen2 => "2",
+            PcieSpeed::Gen3 => "3",
+            PcieSpeed::Gen4 => "4",
+            PcieSpeed::Gen5 => "5",
             PcieSpeed::Unknown => "Unknown",
             PcieSpeed::NA => "N/A",
         };

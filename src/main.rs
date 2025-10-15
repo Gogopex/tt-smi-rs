@@ -293,9 +293,7 @@ async fn snapshot_devices(output: Option<String>, local_only: bool) -> Result<()
     let mut telemetry_data = backend.get_initial_data().await?;
 
     if local_only {
-        telemetry_data.retain(|data| {
-            !data.device_info.board_type.to_string().ends_with(" R")
-        });
+        telemetry_data.retain(|data| !data.device_info.board_type.to_string().ends_with(" R"));
     }
 
     let host_info = utils::get_host_info();
